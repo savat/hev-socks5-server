@@ -40,7 +40,8 @@ jobs:
         run: |
           wget https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
           unzip -q android-ndk-r27d-linux.zip
-          ln -sf . jni
+          # ลบบรรทัดนี้ออก เพราะสร้าง symlink ไม่จำเป็น
+          # ln -sf . jni
 
       - name: Build ${{ matrix.name }}
         run: |
@@ -72,14 +73,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release
-          pattern: "hev-socks5-server-*"
+          pattern: "hev-socks5-server-android-*"  # แก้ pattern ให้ตรงกับชื่อ artifact
           merge-multiple: true
 
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          for i in release/**/*.so; do
-            gh release upload ${{ github.event.release.tag_name }} "$i"
+          for i in release/*.so; do  # แก้ path ให้ตรง
+            gh release upload ${{ github.event.release.tag_name }} "$i" --clobber
           done
-          
