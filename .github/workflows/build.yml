@@ -1,0 +1,56 @@
+name: Build Hev Socks5 Server
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install NDK
+        run: |
+          echo "y" | sdkmanager --install "ndk;28.2.13676358"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> $GITHUB_ENV
+
+      - name: Grant execute permission
+        run: chmod +x build-android.sh
+
+      - name: Build
+        run: ./build-android.sh
+
+      - name: Upload arm64-v8a
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm64-v8a
+          path: libs/arm64-v8a/*.so
+
+      - name: Upload armeabi-v7a
+        uses: actions/upload-artifact@v4
+        with:
+          name: armeabi-v7a
+          path: libs/armeabi-v7a/*.so
+
+      - name: Upload x86
+        uses: actions/upload-artifact@v4
+        with:
+          name: x86
+          path: libs/x86/*.so
+
+      - name: Upload x86_64
+        uses: actions/upload-artifact@v4
+        with:
+          name: x86_64
+          path: libs/x86_64/*.so
